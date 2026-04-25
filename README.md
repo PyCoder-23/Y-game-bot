@@ -65,3 +65,4 @@ To extend the bot later to include AI opponents:
 3. When the bot's turn is triggered, call the AI function to select the best move and pass it to `make_move(board, node, color)`.
 4. Since the state is represented purely as a string (`"-" * 93`) and logic is decoupled from rendering, AI simulations can be run very efficiently.
 # Y-game
+# Y-game-bot
