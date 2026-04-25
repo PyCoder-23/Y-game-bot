@@ -5,9 +5,11 @@ import time
 import io
 import storage
 import game_logic
+from dotenv import load_dotenv
+load_dotenv()
 
 # --- Bot Setup ---
-TOKEN = os.getenv("DISCORD_TOKEN", "YOUR_BOT_TOKEN_HERE")
+TOKEN = os.getenv("DISCORD_TOKEN")
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
