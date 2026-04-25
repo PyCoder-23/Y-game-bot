@@ -96,6 +96,28 @@ async def play(ctx, number: int):
         storage.end_game(ctx.channel.id)
 
 @bot.command()
+async def swap(ctx):
+    """Exercise the 'pie rule' to swap roles after the first move."""
+    game = storage.get_game_by_user(ctx.author.id)
+    if not game:
+        return await ctx.send("❌ You are not in an active game.")
+    
+    if ctx.author.id != game["blue_player_id"]:
+        return await ctx.send("❌ Only the second player (Blue) can use the swap rule.")
+        
+    success, message = game_logic.swap_players(game)
+    if not success:
+        return await ctx.send(f"❌ {message}")
+        
+    # Re-render the board (no new moves, but roles changed in logic)
+    # The last move is still there, but now belongs to the new Red.
+    last_node = game["move_history"][0][1]
+    buf = game_logic.get_board_image(game, last_node=last_node)
+    file = discord.File(buf, filename="board.png")
+    
+    await ctx.send(message, file=file)
+
+@bot.command()
 async def giveup(ctx):
     """Resign the current game."""
     game = storage.get_game_by_user(ctx.author.id)
@@ -125,7 +147,8 @@ async def flag(ctx):
     TIMEOUT = 300 # 5 minutes
     
     if time_since_move >= TIMEOUT:
-        winner_color = "Red" if ctx.author.id == game["red_player_id"] else "Blue"
+        winner_id = game["red_player_id"] if ctx.author.id == game["red_player_id"] else game["blue_player_id"]
+        winner_color = "Red" if winner_id == game["red_player_id"] else "Blue"
         await ctx.send(f"⏰ **Timeout!** {ctx.author.mention} claims victory as the opponent failed to move within 300s. **{winner_color} wins!**")
         storage.end_game(ctx.channel.id)
     else:
@@ -139,6 +162,7 @@ async def help(ctx):
     embed.add_field(name="!challenge @user", value="Invite someone to a new game.", inline=False)
     embed.add_field(name="!accept / !reject", value="Respond to a pending challenge.", inline=False)
     embed.add_field(name="!play <number>", value="Capture a node (e.g. `!play 42`).", inline=False)
+    embed.add_field(name="!swap", value="[Pie Rule] Swap roles with opponent after their first move.", inline=False)
     embed.add_field(name="!giveup", value="Resign your current game.", inline=False)
     embed.add_field(name="!flag", value="Win if the opponent takes >300s to move.", inline=False)
     embed.add_field(name="!help", value="Show this menu.", inline=False)

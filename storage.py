@@ -21,6 +21,7 @@ def create_game(channel_id, red_id, blue_id):
         "turn": "R",
         "board": "E" * 93,
         "move_history": [],
+        "swap_available": True,
         "last_move_timestamp": time.time(),
         "started_at": time.time()
     }
